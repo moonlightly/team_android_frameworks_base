@@ -555,11 +555,6 @@ class ContextImpl extends Context {
                     return new ProfileManager (outerContext, ctx.mMainThread.getHandler());
                 }});
 
-        registerService(WimaxManagerConstants.WIMAX_SERVICE, new ServiceFetcher() {
-                public Object createService(ContextImpl ctx) {
-                    return WimaxHelper.createWimaxService(ctx, ctx.mMainThread.getHandler());
-                }});
-
         registerService("fm_receiver", new ServiceFetcher() {
                 public Object createService(ContextImpl ctx) {
                     IBinder b = ServiceManager.getService("fm_receiver");
@@ -572,6 +567,11 @@ class ContextImpl extends Context {
                     IBinder b = ServiceManager.getService("fm_transmitter");
                     IFmTransmitter service = IFmTransmitter.Stub.asInterface(b);
                     return new FmTransmitterImpl(service);
+                }});
+
+        registerService(WimaxManagerConstants.WIMAX_SERVICE, new ServiceFetcher() {
+                public Object createService(ContextImpl ctx) {
+                    return WimaxHelper.createWimaxService(ctx, ctx.mMainThread.getHandler());
                 }});
     }
 
