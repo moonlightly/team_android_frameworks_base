@@ -45,6 +45,7 @@ import com.android.internal.telephony.cdma.EriInfo;
 import com.android.internal.telephony.cdma.TtyIntent;
 import com.android.server.am.BatteryStatsService;
 import com.android.systemui.R;
+import com.android.systemui.R.drawable;
 
 /**
  * This class contains all of the policy about which icons are installed in the status
