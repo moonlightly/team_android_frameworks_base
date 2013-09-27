@@ -1218,7 +1218,7 @@ public class NetworkController extends BroadcastReceiver {
             }
         }
 		
-		mobileLabel = CarrierLabel.operatorCheck(mobileLabel);  增加运营商中文化 by cofface
+		mobileLabel = CarrierLabel.operatorCheck(mobileLabel);  //增加运营商中文化 by cofface
 
         if (DEBUG) {
             Slog.d(TAG, "refreshViews connected={"
