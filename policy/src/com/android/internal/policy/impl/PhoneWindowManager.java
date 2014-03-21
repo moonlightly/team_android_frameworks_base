@@ -1826,11 +1826,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 break;
         }
     }
-    
+
     void readLidState() {
         mLidState = mWindowManagerFuncs.getLidState();
     }
-    
     private boolean isHidden(int accessibilityMode) {
         switch (accessibilityMode) {
             case 1:
@@ -4311,6 +4310,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         mLidState = newLidState;
+
+        Intent intent = new Intent(ACTION_LID_STATE_CHANGED);
+        intent.putExtra(EXTRA_LID_STATE, mLidState);
+        mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
+
         applyLidSwitchState();
         updateRotation(true);
 
@@ -5679,7 +5683,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mPowerManager.setKeyboardVisibility(isBuiltInKeyboardVisible());
 
         if (mLidState == LID_CLOSED && mLidControlsSleep) {
-            mPowerManager.goToSleep(SystemClock.uptimeMillis());
+            ITelephony telephonyService = getTelephonyService();
+            try {
+                if(telephonyService != null && telephonyService.isIdle()) {
+                    mPowerManager.goToSleep(SystemClock.uptimeMillis());
+                }
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
         }
     }
 
