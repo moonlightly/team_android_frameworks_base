@@ -19,10 +19,8 @@
 package com.android.keyguard;
 
 import android.graphics.Bitmap;
-
 import com.android.internal.policy.IKeyguardExitCallback;
 import com.android.internal.policy.IKeyguardShowCallback;
-
 import static android.provider.Settings.System.SCREEN_OFF_TIMEOUT;
 
 import android.app.Activity;
@@ -60,7 +58,6 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicy;
-import android.view.WindowManagerPolicy.WindowManagerFuncs;
 
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.util.cm.QuietHoursUtils;
@@ -116,6 +113,9 @@ public class KeyguardViewMediator {
 
     private static final String DELAYED_KEYGUARD_ACTION =
         "com.android.internal.policy.impl.PhoneWindowManager.DELAYED_KEYGUARD";
+
+    private static final String DISMISS_KEYGUARD_SECURELY_ACTION =
+            "com.android.keyguard.action.DISMISS_KEYGUARD_SECURELY";
 
     // used for handler messages
     private static final int SHOW = 2;
@@ -258,8 +258,6 @@ public class KeyguardViewMediator {
     private ProfileManager mProfileManager;
 
     private int mSlideLockDelay;
-
-    private int mLidState = WindowManagerPolicy.WindowManagerFuncs.LID_ABSENT;
 
     /**
      * The volume applied to the lock/unlock sounds.
@@ -514,10 +512,9 @@ public class KeyguardViewMediator {
         mShowKeyguardWakeLock = mPM.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "show keyguard");
         mShowKeyguardWakeLock.setReferenceCounted(false);
 
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(DELAYED_KEYGUARD_ACTION);
-        filter.addAction(WindowManagerPolicy.ACTION_LID_STATE_CHANGED);
-        mContext.registerReceiver(mBroadcastReceiver, filter);
+        mContext.registerReceiver(mBroadcastReceiver, new IntentFilter(DELAYED_KEYGUARD_ACTION));
+        mContext.registerReceiver(mBroadcastReceiver, new IntentFilter(DISMISS_KEYGUARD_SECURELY_ACTION),
+                android.Manifest.permission.CONTROL_KEYGUARD, null);
 
         mKeyguardDisplayManager = new KeyguardDisplayManager(context);
 
@@ -1098,13 +1095,9 @@ public class KeyguardViewMediator {
                         doKeyguardLocked(null);
                     }
                 }
-            } else if (WindowManagerPolicy.ACTION_LID_STATE_CHANGED.equals(intent.getAction())) {
-                final int state = intent.getIntExtra(WindowManagerPolicy.EXTRA_LID_STATE, WindowManagerFuncs.LID_ABSENT);
+            } else if (DISMISS_KEYGUARD_SECURELY_ACTION.equals(intent.getAction())) {
                 synchronized (KeyguardViewMediator.this) {
-                    if(state != mLidState) {
-                        mLidState = state;
-                        mUpdateMonitor.dispatchLidStateChange(state);
-                    }
+                    dismiss();
                 }
             }
         }
